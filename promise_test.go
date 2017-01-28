@@ -1,8 +1,42 @@
 package promise
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gopherjs/gopherjs/js"
+)
 
 var expected = "Success!"
+
+func BenchmarkRawPromise(b *testing.B) {
+	b.ResetTimer()
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
+		ch := make(chan promiseResult)
+		defer close(ch)
+		js.Global.Call("EmptyPromise").Call("then", func(r *js.Object) {
+			b.StartTimer()
+			ch <- promiseResult{result: r.String()}
+		})
+		<-ch
+		b.StopTimer()
+	}
+}
+
+func BenchmarkRawCalback(b *testing.B) {
+	b.ResetTimer()
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
+		ch := make(chan promiseResult, 1)
+		defer close(ch)
+		js.Global.Call("EmptyCallback", func(r *js.Object) {
+			b.StartTimer()
+			ch <- promiseResult{result: r.String()}
+		})
+		<-ch
+		b.StopTimer()
+	}
+}
 
 func TestDoPromise1(t *testing.T) {
 	result, _ := DoPromise1()

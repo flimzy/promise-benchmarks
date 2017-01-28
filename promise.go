@@ -8,8 +8,8 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var emptyPromise = js.Global.Get("EmptyPromise")
-var emptyCallback = js.Global.Get("EmptyCallback")
+// var emptyPromise = js.Global.Get("EmptyPromise")
+// var emptyCallback = js.Global.Get("EmptyCallback")
 
 type promiseResult struct {
 	result string
@@ -21,7 +21,7 @@ func DoPromise1() (string, error) {
 	var result string
 	var wg sync.WaitGroup
 	wg.Add(1)
-	emptyPromise.Call("then", func(r *js.Object) {
+	js.Global.Call("EmptyPromise").Call("then", func(r *js.Object) {
 		defer wg.Done()
 		result = r.String()
 	})
@@ -33,7 +33,7 @@ func DoPromise1() (string, error) {
 func DoPromise2() (string, error) {
 	ch := make(chan promiseResult)
 	defer close(ch)
-	emptyPromise.Call("then", func(r *js.Object) {
+	js.Global.Call("EmptyPromise").Call("then", func(r *js.Object) {
 		ch <- promiseResult{result: r.String()}
 	})
 	r := <-ch
@@ -46,7 +46,7 @@ const sleepTime time.Duration = 1315666 / 3 // 1315666ns is the time it takes to
 func DoPromise3() (string, error) {
 	var resolved bool
 	var result string
-	emptyPromise.Call("then", func(r *js.Object) {
+	js.Global.Call("EmptyPromise").Call("then", func(r *js.Object) {
 		result = r.String()
 		resolved = true
 	})
