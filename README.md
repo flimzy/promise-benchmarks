@@ -33,17 +33,18 @@ channel operation, callbacks are faster than promises. Something must be wrong
 with these tests.
 
 The most surprising finding, for me, was that using bare callbacks were far
-more performant, on the order of 225x faster than promises. To a JS developer,
-this likely is not surprising at all, but alas, I'm a Go developer.
+more performant, on the order of 225x faster than promises.
 
 ```
-BenchmarkRawPromise         2000           1156000 ns/op
-BenchmarkRawCalback       200000              6070 ns/op
-BenchmarkDoPromise1         1000           1318000 ns/op
-BenchmarkDoPromise2         2000           1253000 ns/op
-BenchmarkDoPromise3         1000           2358000 ns/op
-BenchmarkDoCallback1      200000              9715 ns/op
-BenchmarkDoCallback2      200000              6280 ns/op
+BenchmarkChannel                  500000              2968 ns/op
+BenchmarkChannelInGoroutine       300000              5056 ns/op
+BenchmarkRawPromise                 2000           1179000 ns/op
+BenchmarkRawCalback               300000              5153 ns/op
+BenchmarkDoPromise1                 2000           1213000 ns/op
+BenchmarkDoPromise2                 2000           1224000 ns/op
+BenchmarkDoPromise3                 1000           2295000 ns/op
+BenchmarkDoCallback1              200000              9760 ns/op
+BenchmarkDoCallback2              200000              6670 ns/op
 ```
 
 I ran my tests using node.js v6.9.3 on Debian stretch (testing), kernel

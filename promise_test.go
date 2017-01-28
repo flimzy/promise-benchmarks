@@ -8,12 +8,40 @@ import (
 
 var expected = "Success!"
 
-func BenchmarkRawPromise(b *testing.B) {
+func BenchmarkChannel(b *testing.B) {
+	ch := make(chan int, 1)
+	defer close(ch)
 	b.ResetTimer()
 	b.StopTimer()
 	for i := 0; i < b.N; i++ {
-		ch := make(chan promiseResult)
-		defer close(ch)
+		b.StartTimer()
+		ch <- 0
+		<-ch
+		b.StopTimer()
+	}
+}
+
+func BenchmarkChannelInGoroutine(b *testing.B) {
+	ch := make(chan int, 1)
+	defer close(ch)
+	b.ResetTimer()
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			b.StartTimer()
+			ch <- 0
+		}()
+		<-ch
+		b.StopTimer()
+	}
+}
+
+func BenchmarkRawPromise(b *testing.B) {
+	ch := make(chan promiseResult)
+	defer close(ch)
+	b.ResetTimer()
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
 		js.Global.Call("EmptyPromise").Call("then", func(r *js.Object) {
 			b.StartTimer()
 			ch <- promiseResult{result: r.String()}
@@ -24,11 +52,11 @@ func BenchmarkRawPromise(b *testing.B) {
 }
 
 func BenchmarkRawCalback(b *testing.B) {
+	ch := make(chan promiseResult, 1)
+	defer close(ch)
 	b.ResetTimer()
 	b.StopTimer()
 	for i := 0; i < b.N; i++ {
-		ch := make(chan promiseResult, 1)
-		defer close(ch)
 		js.Global.Call("EmptyCallback", func(r *js.Object) {
 			b.StartTimer()
 			ch <- promiseResult{result: r.String()}
